@@ -1,13 +1,16 @@
+import { useRouter } from 'expo-router';
 import {
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 
 export default function HomeScreen() {
+  const router = useRouter();
+
   return (
     <ScrollView
       style={styles.container}
@@ -18,6 +21,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Hello, Beautiful! 👋</Text>
+
           <Text style={styles.headerSubtitle}>
             Find your perfect beauty service
           </Text>
@@ -51,7 +55,9 @@ export default function HomeScreen() {
           </Text>
 
           <TouchableOpacity style={styles.bannerButton}>
-            <Text style={styles.bannerButtonText}>Explore Now</Text>
+            <Text style={styles.bannerButtonText}>
+              Explore Now
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -85,65 +91,83 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.muaCard}>
-        <View style={styles.muaImage}>
-          <Text style={styles.muaImageEmoji}>💄</Text>
-        </View>
+      {/* ALYA */}
+<TouchableOpacity
+  style={styles.muaCard}
+  activeOpacity={0.7}
+  onPress={() => {
+    router.push('/mua/alya' as any);
+  }}
+>
+  <View style={styles.muaImage}>
+    <Text style={styles.muaImageEmoji}>💄</Text>
+  </View>
 
-        <View style={styles.muaInfo}>
-          <Text style={styles.muaName}>Alya Makeup Artist</Text>
+  <View style={styles.muaInfo}>
+    <Text style={styles.muaName}>
+      Alya Makeup Artist
+    </Text>
 
-          <Text style={styles.muaLocation}>
-            📍 Jakarta Selatan
-          </Text>
+    <Text style={styles.muaLocation}>
+      📍 Jakarta Selatan
+    </Text>
 
-          <View style={styles.ratingRow}>
-            <Text style={styles.rating}>⭐ 4.9</Text>
+    <View style={styles.ratingRow}>
+      <Text style={styles.rating}>⭐ 4.9</Text>
 
-            <Text style={styles.review}>
-              (128 reviews)
-            </Text>
-          </View>
+      <Text style={styles.review}>
+        (128 reviews)
+      </Text>
+    </View>
 
-          <Text style={styles.price}>
-            Start from Rp350.000
-          </Text>
-        </View>
+    <Text style={styles.price}>
+      Start from Rp350.000
+    </Text>
+  </View>
 
-        <TouchableOpacity style={styles.favoriteButton}>
-          <Text style={styles.favoriteIcon}>♡</Text>
-        </TouchableOpacity>
-      </View>
+  <View style={styles.favoriteButton}>
+    <Text style={styles.favoriteIcon}>♡</Text>
+  </View>
+</TouchableOpacity>
 
-      <View style={styles.muaCard}>
-        <View style={styles.muaImage}>
-          <Text style={styles.muaImageEmoji}>💋</Text>
-        </View>
+      {/* NADIA */}
+<TouchableOpacity
+  style={styles.muaCard}
+  activeOpacity={0.7}
+  onPress={() => {
+    router.push('/mua/nadia' as any);
+  }}
+>
+  <View style={styles.muaImage}>
+    <Text style={styles.muaImageEmoji}>💋</Text>
+  </View>
 
-        <View style={styles.muaInfo}>
-          <Text style={styles.muaName}>Nadia Beauty</Text>
+  <View style={styles.muaInfo}>
+    <Text style={styles.muaName}>
+      Nadia Beauty
+    </Text>
 
-          <Text style={styles.muaLocation}>
-            📍 Tangerang
-          </Text>
+    <Text style={styles.muaLocation}>
+      📍 Tangerang
+    </Text>
 
-          <View style={styles.ratingRow}>
-            <Text style={styles.rating}>⭐ 4.8</Text>
+    <View style={styles.ratingRow}>
+      <Text style={styles.rating}>⭐ 4.8</Text>
 
-            <Text style={styles.review}>
-              (96 reviews)
-            </Text>
-          </View>
+      <Text style={styles.review}>
+        (96 reviews)
+      </Text>
+    </View>
 
-          <Text style={styles.price}>
-            Start from Rp300.000
-          </Text>
-        </View>
+    <Text style={styles.price}>
+      Start from Rp300.000
+    </Text>
+  </View>
 
-        <TouchableOpacity style={styles.favoriteButton}>
-          <Text style={styles.favoriteIcon}>♡</Text>
-        </TouchableOpacity>
-      </View>
+  <View style={styles.favoriteButton}>
+    <Text style={styles.favoriteIcon}>♡</Text>
+  </View>
+</TouchableOpacity>
     </ScrollView>
   );
 }
