@@ -1,18 +1,23 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function MUADetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
+  const [isFavorite, setIsFavorite] = useState(false);
+
   const mua = {
+    id: id || 'alya',
     name: id === 'alya' ? 'Alya Makeup Artist' : 'Nadia Beauty',
     location: id === 'alya' ? 'Jakarta Selatan' : 'Tangerang',
     rating: id === 'alya' ? '4.9' : '4.8',
@@ -20,6 +25,55 @@ export default function MUADetailScreen() {
     price: id === 'alya' ? 'Rp350.000' : 'Rp300.000',
     description:
       'Professional makeup artist yang siap membantu kamu tampil lebih cantik dan percaya diri untuk berbagai kebutuhan acara.',
+  };
+
+  // Cek apakah MUA sudah menjadi favorite
+  useEffect(() => {
+    const checkFavorite = async () => {
+      try {
+        const saved = await AsyncStorage.getItem('favorites');
+
+        if (saved) {
+          const favorites: string[] = JSON.parse(saved);
+
+          setIsFavorite(favorites.includes(mua.id));
+        }
+      } catch (error) {
+        console.log('Error checking favorite:', error);
+      }
+    };
+
+    checkFavorite();
+  }, [mua.id]);
+
+  // Tambah / hapus favorite
+  const toggleFavorite = async () => {
+    try {
+      const saved = await AsyncStorage.getItem('favorites');
+
+      let favorites: string[] = saved ? JSON.parse(saved) : [];
+
+      if (favorites.includes(mua.id)) {
+        // Hapus dari favorite
+        favorites = favorites.filter(
+          (favoriteId) => favoriteId !== mua.id
+        );
+
+        setIsFavorite(false);
+      } else {
+        // Tambahkan ke favorite
+        favorites.push(mua.id);
+
+        setIsFavorite(true);
+      }
+
+      await AsyncStorage.setItem(
+        'favorites',
+        JSON.stringify(favorites)
+      );
+    } catch (error) {
+      console.log('Error updating favorite:', error);
+    }
   };
 
   return (
@@ -36,8 +90,18 @@ export default function MUADetailScreen() {
 
           <Text style={styles.headerTitle}>MUA Detail</Text>
 
-          <TouchableOpacity style={styles.favoriteButton}>
-            <Text style={styles.favoriteIcon}>♡</Text>
+          <TouchableOpacity
+            style={styles.favoriteButton}
+            onPress={toggleFavorite}
+          >
+            <Text
+              style={[
+                styles.favoriteIcon,
+                isFavorite && styles.favoriteActive,
+              ]}
+            >
+              {isFavorite ? '♥' : '♡'}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -56,11 +120,17 @@ export default function MUADetailScreen() {
           <View style={styles.nameRow}>
             <View style={styles.nameContainer}>
               <Text style={styles.name}>{mua.name}</Text>
-              <Text style={styles.location}>📍 {mua.location}</Text>
+
+              <Text style={styles.location}>
+                📍 {mua.location}
+              </Text>
             </View>
 
             <View style={styles.ratingBox}>
-              <Text style={styles.rating}>★ {mua.rating}</Text>
+              <Text style={styles.rating}>
+                ★ {mua.rating}
+              </Text>
+
               <Text style={styles.reviewCount}>
                 {mua.reviews} reviews
               </Text>
@@ -69,8 +139,13 @@ export default function MUADetailScreen() {
 
           {/* Price */}
           <View style={styles.priceCard}>
-            <Text style={styles.priceLabel}>Starting from</Text>
-            <Text style={styles.price}>{mua.price}</Text>
+            <Text style={styles.priceLabel}>
+              Starting from
+            </Text>
+
+            <Text style={styles.price}>
+              {mua.price}
+            </Text>
           </View>
 
           {/* About */}
@@ -86,20 +161,38 @@ export default function MUADetailScreen() {
           <View style={styles.services}>
             <View style={styles.serviceCard}>
               <Text style={styles.serviceIcon}>💄</Text>
-              <Text style={styles.serviceName}>Makeup</Text>
-              <Text style={styles.servicePrice}>{mua.price}</Text>
+
+              <Text style={styles.serviceName}>
+                Makeup
+              </Text>
+
+              <Text style={styles.servicePrice}>
+                {mua.price}
+              </Text>
             </View>
 
             <View style={styles.serviceCard}>
               <Text style={styles.serviceIcon}>👰</Text>
-              <Text style={styles.serviceName}>Bridal</Text>
-              <Text style={styles.servicePrice}>Rp1.500.000</Text>
+
+              <Text style={styles.serviceName}>
+                Bridal
+              </Text>
+
+              <Text style={styles.servicePrice}>
+                Rp1.500.000
+              </Text>
             </View>
 
             <View style={styles.serviceCard}>
               <Text style={styles.serviceIcon}>✨</Text>
-              <Text style={styles.serviceName}>Party</Text>
-              <Text style={styles.servicePrice}>Rp500.000</Text>
+
+              <Text style={styles.serviceName}>
+                Party
+              </Text>
+
+              <Text style={styles.servicePrice}>
+                Rp500.000
+              </Text>
             </View>
           </View>
 
@@ -113,14 +206,19 @@ export default function MUADetailScreen() {
               </View>
 
               <View>
-                <Text style={styles.reviewer}>Amanda</Text>
-                <Text style={styles.reviewStars}>★★★★★</Text>
+                <Text style={styles.reviewer}>
+                  Amanda
+                </Text>
+
+                <Text style={styles.reviewStars}>
+                  ★★★★★
+                </Text>
               </View>
             </View>
 
             <Text style={styles.reviewText}>
-              Makeup-nya bagus banget dan MUA-nya ramah. Hasilnya
-              sesuai dengan request aku!
+              Makeup-nya bagus banget dan MUA-nya ramah.
+              Hasilnya sesuai dengan request aku!
             </Text>
           </View>
 
@@ -131,23 +229,30 @@ export default function MUADetailScreen() {
       {/* Bottom Booking */}
       <View style={styles.bottomBar}>
         <View>
-          <Text style={styles.bottomLabel}>Starting from</Text>
-          <Text style={styles.bottomPrice}>{mua.price}</Text>
+          <Text style={styles.bottomLabel}>
+            Starting from
+          </Text>
+
+          <Text style={styles.bottomPrice}>
+            {mua.price}
+          </Text>
         </View>
 
         <TouchableOpacity
           style={styles.bookButton}
           onPress={() =>
-  router.push({
-    pathname: '/booking' as any,
-    params: {
-      mua: mua.name,
-      price: mua.price,
-    },
-  })
-}
+            router.push({
+              pathname: '/booking' as any,
+              params: {
+                mua: mua.name,
+                price: mua.price,
+              },
+            })
+          }
         >
-          <Text style={styles.bookButtonText}>Book Now</Text>
+          <Text style={styles.bookButtonText}>
+            Book Now
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -201,6 +306,10 @@ const styles = StyleSheet.create({
 
   favoriteIcon: {
     fontSize: 27,
+    color: '#E91E63',
+  },
+
+  favoriteActive: {
     color: '#E91E63',
   },
 
