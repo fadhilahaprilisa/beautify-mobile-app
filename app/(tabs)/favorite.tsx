@@ -3,57 +3,28 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 
-type MUA = {
-  id: string;
-  name: string;
-  location: string;
-  rating: string;
-  reviews: string;
-  price: string;
-  image: string;
-};
-
-const MUA_DATA: MUA[] = [
-  {
-    id: 'alya',
-    name: 'Alya Makeup Artist',
-    location: 'Jakarta Selatan',
-    rating: '4.9',
-    reviews: '128 reviews',
-    price: 'Rp350.000',
-    image:
-      'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=500',
-  },
-  {
-    id: 'nadia',
-    name: 'Nadia Beauty',
-    location: 'Tangerang',
-    rating: '4.8',
-    reviews: '96 reviews',
-    price: 'Rp300.000',
-    image:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500',
-  },
-];
+import { MUA_DATA } from '@/data/muaData';
 
 export default function FavoriteScreen() {
   const router = useRouter();
-  const [favorites, setFavorites] = useState<string[]>([]);
+
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 
   const loadFavorites = async () => {
     try {
-      const saved = await AsyncStorage.getItem('favorites');
+      const favorites = await AsyncStorage.getItem('favorites');
 
-      if (saved) {
-        setFavorites(JSON.parse(saved));
+      if (favorites) {
+        setFavoriteIds(JSON.parse(favorites));
       } else {
-        setFavorites([]);
+        setFavoriteIds([]);
       }
     } catch (error) {
       console.log('Error loading favorites:', error);
@@ -67,46 +38,51 @@ export default function FavoriteScreen() {
   );
 
   const favoriteMUA = MUA_DATA.filter((mua) =>
-    favorites.includes(mua.id)
+    favoriteIds.includes(mua.id)
   );
 
   const removeFavorite = async (id: string) => {
-    const updatedFavorites = favorites.filter(
-      (favoriteId) => favoriteId !== id
-    );
+    try {
+      const updatedFavorites = favoriteIds.filter(
+        (favoriteId) => favoriteId !== id
+      );
 
-    setFavorites(updatedFavorites);
+      await AsyncStorage.setItem(
+        'favorites',
+        JSON.stringify(updatedFavorites)
+      );
 
-    await AsyncStorage.setItem(
-      'favorites',
-      JSON.stringify(updatedFavorites)
-    );
+      setFavoriteIds(updatedFavorites);
+    } catch (error) {
+      console.log('Error removing favorite:', error);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Favorite</Text>
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>My Favorites ❤️</Text>
 
-      <Text style={styles.subtitle}>
-        MUA yang kamu simpan
-      </Text>
+        <Text style={styles.subtitle}>
+          Your favorite beauty artists
+        </Text>
+      </View>
 
       {favoriteMUA.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>♡</Text>
 
           <Text style={styles.emptyTitle}>
-            Belum ada favorite
+            No Favorites Yet
           </Text>
 
           <Text style={styles.emptyText}>
-            Simpan MUA favoritmu untuk menemukannya
-            dengan mudah nanti.
+            Kamu belum memiliki MUA favorit.
           </Text>
 
           <TouchableOpacity
             style={styles.exploreButton}
-            onPress={() => router.push('/(tabs)' as any)}
+            onPress={() => router.push('/')}
           >
             <Text style={styles.exploreButtonText}>
               Explore MUA
@@ -114,76 +90,173 @@ export default function FavoriteScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-        favoriteMUA.map((mua) => (
-          <TouchableOpacity
-            key={mua.id}
-            style={styles.card}
-            activeOpacity={0.8}
-            onPress={() =>
-              router.push(`/mua/${mua.id}` as any)
-            }
-          >
-            <Image
-              source={{ uri: mua.image }}
-              style={styles.image}
-            />
-
-            <View style={styles.cardContent}>
-              <Text style={styles.name}>{mua.name}</Text>
-
-              <Text style={styles.location}>
-                📍 {mua.location}
-              </Text>
-
-              <Text style={styles.rating}>
-                ⭐ {mua.rating} ({mua.reviews})
-              </Text>
-
-              <Text style={styles.price}>
-                {mua.price}
-              </Text>
-            </View>
-
+        <View style={styles.listContainer}>
+          {favoriteMUA.map((mua) => (
             <TouchableOpacity
-              style={styles.heartButton}
-              onPress={() => removeFavorite(mua.id)}
+              key={mua.id}
+              style={styles.card}
+              onPress={() =>
+                router.push(`/mua/${mua.id}` as any)
+              }
+              activeOpacity={0.8}
             >
-              <Text style={styles.heart}>♥</Text>
+              <Image
+                source={{ uri: mua.image }}
+                style={styles.image}
+              />
+
+              <View style={styles.cardContent}>
+                <View style={styles.nameRow}>
+                  <Text style={styles.name}>
+                    {mua.name}
+                  </Text>
+
+                  <TouchableOpacity
+                    onPress={() => removeFavorite(mua.id)}
+                  >
+                    <Text style={styles.heart}>
+                      ♥
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.location}>
+                  📍 {mua.location}
+                </Text>
+
+                <View style={styles.infoRow}>
+                  <Text style={styles.rating}>
+                    ⭐ {mua.rating}
+                  </Text>
+
+                  <Text style={styles.reviews}>
+                    ({mua.reviews} reviews)
+                  </Text>
+                </View>
+
+                <Text style={styles.price}>
+                  {mua.priceLabel}
+                </Text>
+              </View>
             </TouchableOpacity>
-          </TouchableOpacity>
-        ))
+          ))}
+        </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF8FB',
+    backgroundColor: '#FFFFFF',
+  },
+
+  header: {
     paddingHorizontal: 20,
     paddingTop: 60,
+    paddingBottom: 20,
   },
 
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '700',
-    color: '#222',
+    color: '#222222',
   },
 
   subtitle: {
-    marginTop: 5,
-    marginBottom: 25,
     fontSize: 14,
-    color: '#777',
+    color: '#777777',
+    marginTop: 5,
+  },
+
+  listContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+  },
+
+  card: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: 16,
+    padding: 10,
+    elevation: 3,
+    shadowColor: '#000000',
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+  },
+
+  image: {
+    width: 105,
+    height: 120,
+    borderRadius: 12,
+  },
+
+  cardContent: {
+    flex: 1,
+    paddingLeft: 12,
+    paddingVertical: 5,
+  },
+
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  name: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#222222',
+    marginRight: 8,
+  },
+
+  heart: {
+    fontSize: 24,
+    color: '#E91E63',
+  },
+
+  location: {
+    fontSize: 13,
+    color: '#777777',
+    marginTop: 8,
+  },
+
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+
+  rating: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#333333',
+  },
+
+  reviews: {
+    fontSize: 12,
+    color: '#888888',
+    marginLeft: 5,
+  },
+
+  price: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#E91E63',
+    marginTop: 8,
   },
 
   emptyContainer: {
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
     paddingHorizontal: 30,
-    marginTop: -80,
+    paddingTop: 100,
   },
 
   emptyIcon: {
@@ -192,96 +265,30 @@ const styles = StyleSheet.create({
   },
 
   emptyTitle: {
-    marginTop: 15,
     fontSize: 20,
     fontWeight: '700',
-    color: '#333',
+    color: '#222222',
+    marginTop: 15,
   },
 
   emptyText: {
+    fontSize: 14,
+    color: '#777777',
     marginTop: 8,
     textAlign: 'center',
-    lineHeight: 21,
-    fontSize: 14,
-    color: '#888',
   },
 
   exploreButton: {
-    marginTop: 25,
-    paddingHorizontal: 25,
-    height: 48,
-    borderRadius: 14,
     backgroundColor: '#E91E63',
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 25,
+    paddingVertical: 13,
+    borderRadius: 10,
+    marginTop: 25,
   },
 
   exploreButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
-  },
-
-  card: {
-    minHeight: 125,
-    marginBottom: 15,
-    padding: 12,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
-    flexDirection: 'row',
-  },
-
-  image: {
-    width: 100,
-    height: 100,
-    borderRadius: 14,
-  },
-
-  cardContent: {
-    flex: 1,
-    marginLeft: 13,
-    paddingTop: 2,
-  },
-
-  name: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#222',
-  },
-
-  location: {
-    marginTop: 7,
-    fontSize: 12,
-    color: '#777',
-  },
-
-  rating: {
-    marginTop: 6,
-    fontSize: 12,
-    color: '#555',
-  },
-
-  price: {
-    marginTop: 7,
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#E91E63',
-  },
-
-  heartButton: {
-    position: 'absolute',
-    right: 12,
-    top: 12,
-    width: 35,
-    height: 35,
-    borderRadius: 18,
-    backgroundColor: '#FFF0F5',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  heart: {
-    fontSize: 19,
-    color: '#E91E63',
   },
 });
