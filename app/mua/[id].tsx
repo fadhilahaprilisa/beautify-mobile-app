@@ -10,244 +10,169 @@ import {
   View,
 } from 'react-native';
 
+import { MUA_DATA } from '@/data/muaData';
+
 export default function MUADetailScreen() {
+  const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
 
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const mua = {
-    id: id || 'alya',
-    name: id === 'alya' ? 'Alya Makeup Artist' : 'Nadia Beauty',
-    location: id === 'alya' ? 'Jakarta Selatan' : 'Tangerang',
-    rating: id === 'alya' ? '4.9' : '4.8',
-    reviews: id === 'alya' ? '128' : '96',
-    price: id === 'alya' ? 'Rp350.000' : 'Rp300.000',
-    description:
-      'Professional makeup artist yang siap membantu kamu tampil lebih cantik dan percaya diri untuk berbagai kebutuhan acara.',
+  const mua = MUA_DATA.find((item) => item.id === id);
+
+  useEffect(() => {
+    checkFavorite();
+  }, [id]);
+
+  const checkFavorite = async () => {
+    try {
+      const favorites = await AsyncStorage.getItem('favorites');
+
+      if (favorites) {
+        const favoriteIds: string[] = JSON.parse(favorites);
+        setIsFavorite(favoriteIds.includes(String(id)));
+      }
+    } catch (error) {
+      console.log('Error checking favorite:', error);
+    }
   };
 
-  // Cek apakah MUA sudah menjadi favorite
-  useEffect(() => {
-    const checkFavorite = async () => {
-      try {
-        const saved = await AsyncStorage.getItem('favorites');
-
-        if (saved) {
-          const favorites: string[] = JSON.parse(saved);
-
-          setIsFavorite(favorites.includes(mua.id));
-        }
-      } catch (error) {
-        console.log('Error checking favorite:', error);
-      }
-    };
-
-    checkFavorite();
-  }, [mua.id]);
-
-  // Tambah / hapus favorite
   const toggleFavorite = async () => {
     try {
-      const saved = await AsyncStorage.getItem('favorites');
+      const favorites = await AsyncStorage.getItem('favorites');
 
-      let favorites: string[] = saved ? JSON.parse(saved) : [];
+      let favoriteIds: string[] = favorites
+        ? JSON.parse(favorites)
+        : [];
 
-      if (favorites.includes(mua.id)) {
-        // Hapus dari favorite
-        favorites = favorites.filter(
-          (favoriteId) => favoriteId !== mua.id
+      if (favoriteIds.includes(String(id))) {
+        favoriteIds = favoriteIds.filter(
+          (favoriteId) => favoriteId !== String(id)
         );
-
         setIsFavorite(false);
       } else {
-        // Tambahkan ke favorite
-        favorites.push(mua.id);
-
+        favoriteIds.push(String(id));
         setIsFavorite(true);
       }
 
       await AsyncStorage.setItem(
         'favorites',
-        JSON.stringify(favorites)
+        JSON.stringify(favoriteIds)
       );
     } catch (error) {
       console.log('Error updating favorite:', error);
     }
   };
 
+  if (!mua) {
+    return (
+      <View style={styles.notFoundContainer}>
+        <Text style={styles.notFoundTitle}>
+          MUA tidak ditemukan
+        </Text>
+
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backButtonText}>Kembali</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Text style={styles.backIcon}>‹</Text>
-          </TouchableOpacity>
+    <ScrollView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.headerButtonText}>‹</Text>
+        </TouchableOpacity>
 
-          <Text style={styles.headerTitle}>MUA Detail</Text>
+        <Text style={styles.headerTitle}>MUA Detail</Text>
 
-          <TouchableOpacity
-            style={styles.favoriteButton}
-            onPress={toggleFavorite}
-          >
-            <Text
-              style={[
-                styles.favoriteIcon,
-                isFavorite && styles.favoriteActive,
-              ]}
-            >
-              {isFavorite ? '♥' : '♡'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={toggleFavorite}
+        >
+          <Text style={styles.favoriteIcon}>
+            {isFavorite ? '♥' : '♡'}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-        {/* Profile Image */}
-        <View style={styles.imageContainer}>
-          <Image
-            source={{
-              uri: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800',
-            }}
-            style={styles.profileImage}
-          />
-        </View>
+      {/* Image */}
+      <Image
+        source={{ uri: mua.image }}
+        style={styles.image}
+      />
 
-        {/* Main Info */}
-        <View style={styles.content}>
-          <View style={styles.nameRow}>
-            <View style={styles.nameContainer}>
-              <Text style={styles.name}>{mua.name}</Text>
+      {/* Content */}
+      <View style={styles.content}>
+        <Text style={styles.name}>{mua.name}</Text>
 
-              <Text style={styles.location}>
-                📍 {mua.location}
-              </Text>
-            </View>
+        <Text style={styles.location}>
+          📍 {mua.location}
+        </Text>
 
-            <View style={styles.ratingBox}>
-              <Text style={styles.rating}>
-                ★ {mua.rating}
-              </Text>
-
-              <Text style={styles.reviewCount}>
-                {mua.reviews} reviews
-              </Text>
-            </View>
-          </View>
-
-          {/* Price */}
-          <View style={styles.priceCard}>
-            <Text style={styles.priceLabel}>
-              Starting from
-            </Text>
-
-            <Text style={styles.price}>
-              {mua.price}
-            </Text>
-          </View>
-
-          {/* About */}
-          <Text style={styles.sectionTitle}>About</Text>
-
-          <Text style={styles.description}>
-            {mua.description}
+        <View style={styles.ratingRow}>
+          <Text style={styles.rating}>
+            ⭐ {mua.rating}
           </Text>
 
-          {/* Services */}
-          <Text style={styles.sectionTitle}>Services</Text>
-
-          <View style={styles.services}>
-            <View style={styles.serviceCard}>
-              <Text style={styles.serviceIcon}>💄</Text>
-
-              <Text style={styles.serviceName}>
-                Makeup
-              </Text>
-
-              <Text style={styles.servicePrice}>
-                {mua.price}
-              </Text>
-            </View>
-
-            <View style={styles.serviceCard}>
-              <Text style={styles.serviceIcon}>👰</Text>
-
-              <Text style={styles.serviceName}>
-                Bridal
-              </Text>
-
-              <Text style={styles.servicePrice}>
-                Rp1.500.000
-              </Text>
-            </View>
-
-            <View style={styles.serviceCard}>
-              <Text style={styles.serviceIcon}>✨</Text>
-
-              <Text style={styles.serviceName}>
-                Party
-              </Text>
-
-              <Text style={styles.servicePrice}>
-                Rp500.000
-              </Text>
-            </View>
-          </View>
-
-          {/* Reviews */}
-          <Text style={styles.sectionTitle}>Reviews</Text>
-
-          <View style={styles.reviewCard}>
-            <View style={styles.reviewHeader}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>A</Text>
-              </View>
-
-              <View>
-                <Text style={styles.reviewer}>
-                  Amanda
-                </Text>
-
-                <Text style={styles.reviewStars}>
-                  ★★★★★
-                </Text>
-              </View>
-            </View>
-
-            <Text style={styles.reviewText}>
-              Makeup-nya bagus banget dan MUA-nya ramah.
-              Hasilnya sesuai dengan request aku!
-            </Text>
-          </View>
-
-          <View style={{ height: 110 }} />
+          <Text style={styles.reviews}>
+            ({mua.reviews} reviews)
+          </Text>
         </View>
-      </ScrollView>
 
-      {/* Bottom Booking */}
-      <View style={styles.bottomBar}>
-        <View>
-          <Text style={styles.bottomLabel}>
+        {/* Category */}
+        <View style={styles.categoryContainer}>
+          {mua.category.map((category) => (
+            <View
+              key={category}
+              style={styles.categoryBadge}
+            >
+              <Text style={styles.categoryText}>
+                {category}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Price */}
+        <View style={styles.priceContainer}>
+          <Text style={styles.priceLabel}>
             Starting from
           </Text>
 
-          <Text style={styles.bottomPrice}>
-            {mua.price}
+          <Text style={styles.price}>
+            {mua.priceLabel}
           </Text>
         </View>
 
+        {/* Description */}
+        <Text style={styles.sectionTitle}>
+          About
+        </Text>
+
+        <Text style={styles.description}>
+          {mua.description}
+        </Text>
+
+        {/* Book Button */}
         <TouchableOpacity
           style={styles.bookButton}
           onPress={() =>
             router.push({
-              pathname: '/booking' as any,
+              pathname: '/booking',
               params: {
-                mua: mua.name,
-                price: mua.price,
+                muaId: mua.id,
+                muaName: mua.name,
               },
-            })
+            } as any)
           }
         >
           <Text style={styles.bookButtonText}>
@@ -255,263 +180,178 @@ export default function MUADetailScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF8FB',
+    backgroundColor: '#FFFFFF',
   },
 
   header: {
-    height: 65,
+    height: 60,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    backgroundColor: '#FFF8FB',
+    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
+  },
+
+  headerButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  headerButtonText: {
+    fontSize: 32,
+    color: '#333333',
   },
 
   headerTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#222',
-  },
-
-  backButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  backIcon: {
-    fontSize: 34,
-    color: '#333',
-    marginTop: -4,
-  },
-
-  favoriteButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    color: '#222222',
   },
 
   favoriteIcon: {
-    fontSize: 27,
+    fontSize: 28,
     color: '#E91E63',
   },
 
-  favoriteActive: {
-    color: '#E91E63',
-  },
-
-  imageContainer: {
-    paddingHorizontal: 20,
-  },
-
-  profileImage: {
+  image: {
     width: '100%',
-    height: 280,
-    borderRadius: 24,
+    height: 300,
   },
 
   content: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-
-  nameRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-
-  nameContainer: {
-    flex: 1,
-    paddingRight: 10,
+    padding: 20,
   },
 
   name: {
-    fontSize: 23,
+    fontSize: 26,
     fontWeight: '700',
-    color: '#222',
+    color: '#222222',
+    marginBottom: 8,
   },
 
   location: {
-    marginTop: 7,
-    fontSize: 14,
-    color: '#777',
+    fontSize: 15,
+    color: '#666666',
+    marginBottom: 12,
   },
 
-  ratingBox: {
-    alignItems: 'flex-end',
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
   },
 
   rating: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#E91E63',
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333333',
   },
 
-  reviewCount: {
-    marginTop: 4,
-    fontSize: 12,
-    color: '#888',
+  reviews: {
+    fontSize: 14,
+    color: '#777777',
+    marginLeft: 6,
   },
 
-  priceCard: {
-    marginTop: 20,
+  categoryContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 20,
+  },
+
+  categoryBadge: {
+    backgroundColor: '#FCE4EC',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+
+  categoryText: {
+    color: '#B75B74',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+
+  priceContainer: {
+    backgroundColor: '#FFF5F8',
+    borderRadius: 12,
     padding: 16,
-    borderRadius: 16,
-    backgroundColor: '#FFE5EF',
+    marginBottom: 24,
   },
 
   priceLabel: {
-    fontSize: 12,
-    color: '#888',
+    fontSize: 13,
+    color: '#777777',
+    marginBottom: 4,
   },
 
   price: {
-    marginTop: 4,
     fontSize: 22,
     fontWeight: '700',
     color: '#E91E63',
   },
 
   sectionTitle: {
-    marginTop: 28,
-    marginBottom: 12,
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#222',
+    color: '#222222',
+    marginBottom: 8,
   },
 
   description: {
-    fontSize: 14,
-    lineHeight: 22,
-    color: '#666',
-  },
-
-  services: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-
-  serviceCard: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-  },
-
-  serviceIcon: {
-    fontSize: 24,
-  },
-
-  serviceName: {
-    marginTop: 8,
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#333',
-  },
-
-  servicePrice: {
-    marginTop: 5,
-    fontSize: 11,
-    color: '#888',
-  },
-
-  reviewCard: {
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
-  },
-
-  reviewHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  avatar: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#FFD3E2',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-
-  avatarText: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#E91E63',
-  },
-
-  reviewer: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#333',
-  },
-
-  reviewStars: {
-    marginTop: 3,
-    fontSize: 12,
-    color: '#E91E63',
-  },
-
-  reviewText: {
-    marginTop: 12,
-    fontSize: 13,
-    lineHeight: 20,
-    color: '#666',
-  },
-
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
-  },
-
-  bottomLabel: {
-    fontSize: 11,
-    color: '#888',
-  },
-
-  bottomPrice: {
-    marginTop: 3,
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#E91E63',
+    fontSize: 15,
+    lineHeight: 23,
+    color: '#666666',
+    marginBottom: 30,
   },
 
   bookButton: {
-    paddingHorizontal: 28,
-    paddingVertical: 14,
-    borderRadius: 14,
     backgroundColor: '#E91E63',
+    borderRadius: 12,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginBottom: 30,
   },
 
   bookButtonText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
+  notFoundContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+
+  notFoundTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 20,
+  },
+
+  backButton: {
+    backgroundColor: '#E91E63',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+
+  backButtonText: {
+    color: '#FFFFFF',
     fontWeight: '700',
   },
 });
