@@ -9,24 +9,6 @@ import {
   View,
 } from 'react-native';
 
-const categories = [
-  'All',
-  'Makeup',
-  'Hair',
-  'Nails',
-  'Wedding',
-  'Party',
-  'Engagement',
-  'Graduation',
-  'Luxury Destination Wedding Package',
-  'Red Carpet & Gala Look VIP',
-  'Commercial & Fashion',
-  'Special Effects (SFX)',
-  'Stage & TV',
-  'Edukasi & Masterclass',
-  'Performance Art Beauty',
-];
-
 const muaData = [
   {
     id: 'alya',
@@ -35,7 +17,7 @@ const muaData = [
     rating: '4.9',
     reviews: '128',
     price: 'Rp350.000',
-    category: ['Makeup', 'Wedding', 'Party', 'Engagement'],
+    category: 'Makeup',
     emoji: '💄',
   },
   {
@@ -45,41 +27,30 @@ const muaData = [
     rating: '4.8',
     reviews: '96',
     price: 'Rp300.000',
-    category: ['Makeup', 'Graduation', 'Party'],
+    category: 'Makeup',
     emoji: '💋',
   },
 ];
 
-export default function ExploreScreen() {
+export default function MUAListScreen() {
   const router = useRouter();
 
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
 
   const filteredMUA = useMemo(() => {
-    return muaData.filter((mua) => {
-      const keyword = search.toLowerCase().trim();
+    const keyword = search.toLowerCase().trim();
 
-      const matchSearch =
-        keyword === '' ||
+    if (!keyword) {
+      return muaData;
+    }
+
+    return muaData.filter(
+      (mua) =>
         mua.name.toLowerCase().includes(keyword) ||
         mua.location.toLowerCase().includes(keyword) ||
-        mua.category.some((item) =>
-          item.toLowerCase().includes(keyword)
-        );
-
-      const matchCategory =
-        selectedCategory === 'All' ||
-        mua.category.includes(selectedCategory);
-
-      return matchSearch && matchCategory;
-    });
-  }, [search, selectedCategory]);
-
-  const clearSearch = () => {
-    setSearch('');
-    setSelectedCategory('All');
-  };
+        mua.category.toLowerCase().includes(keyword)
+    );
+  }, [search]);
 
   return (
     <View style={styles.container}>
@@ -89,18 +60,29 @@ export default function ExploreScreen() {
       >
         {/* HEADER */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>Explore</Text>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.backIcon}>‹</Text>
+          </TouchableOpacity>
 
-            <Text style={styles.subtitle}>
-              Find the perfect beauty artist for your special moment
-            </Text>
-          </View>
+          <Text style={styles.headerTitle}>
+            Popular MUA
+          </Text>
 
-          <View style={styles.headerIcon}>
-            <Text style={styles.headerIconText}>✨</Text>
-          </View>
+          <View style={styles.headerSpace} />
         </View>
+
+        {/* INTRO */}
+        <Text style={styles.title}>
+          Find Your Beauty Artist
+        </Text>
+
+        <Text style={styles.subtitle}>
+          Discover makeup artists and beauty professionals
+          for your special moment.
+        </Text>
 
         {/* SEARCH */}
         <View style={styles.searchContainer}>
@@ -109,7 +91,7 @@ export default function ExploreScreen() {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Search artist, location, category..."
+            placeholder="Search makeup artist..."
             placeholderTextColor="#999"
             style={styles.searchInput}
           />
@@ -117,84 +99,17 @@ export default function ExploreScreen() {
           {search.length > 0 && (
             <TouchableOpacity
               onPress={() => setSearch('')}
-              style={styles.clearButton}
             >
               <Text style={styles.clearText}>×</Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {/* QUICK INFO */}
-        <View style={styles.infoCard}>
-          <View style={styles.infoIcon}>
-            <Text>💗</Text>
-          </View>
-
-          <View style={styles.infoTextContainer}>
-            <Text style={styles.infoTitle}>
-              Discover Your Beauty Artist
-            </Text>
-
-            <Text style={styles.infoText}>
-              Browse artists, explore services, and find the
-              perfect match for your event.
-            </Text>
-          </View>
-        </View>
-
-        {/* CATEGORY */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Categories</Text>
-
-          <Text style={styles.categoryHint}>
-            {categories.length - 1} categories
-          </Text>
-        </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryList}
-        >
-          {categories.map((category) => {
-            const selected = selectedCategory === category;
-
-            return (
-              <TouchableOpacity
-                key={category}
-                style={[
-                  styles.categoryButton,
-                  selected && styles.categoryButtonSelected,
-                ]}
-                activeOpacity={0.75}
-                onPress={() => setSelectedCategory(category)}
-              >
-                <Text
-                  style={[
-                    styles.categoryText,
-                    selected && styles.categoryTextSelected,
-                  ]}
-                >
-                  {category}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-
-        {/* RESULT HEADER */}
+        {/* RESULT */}
         <View style={styles.resultHeader}>
-          <View>
-            <Text style={styles.sectionTitle}>
-              Beauty Artists
-            </Text>
-
-            {selectedCategory !== 'All' && (
-              <Text style={styles.activeFilter}>
-                Showing: {selectedCategory}
-              </Text>
-            )}
-          </View>
+          <Text style={styles.sectionTitle}>
+            Beauty Artists
+          </Text>
 
           <Text style={styles.resultCount}>
             {filteredMUA.length} found
@@ -219,7 +134,9 @@ export default function ExploreScreen() {
                 </Text>
 
                 <View style={styles.verifiedBadge}>
-                  <Text style={styles.verifiedText}>✓</Text>
+                  <Text style={styles.verifiedText}>
+                    ✓
+                  </Text>
                 </View>
               </View>
 
@@ -256,20 +173,21 @@ export default function ExploreScreen() {
           ))
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🔍</Text>
+            <Text style={styles.emptyIcon}>
+              🔍
+            </Text>
 
             <Text style={styles.emptyTitle}>
               MUA not found
             </Text>
 
             <Text style={styles.emptyText}>
-              Coba cari nama MUA, lokasi, atau kategori
-              lainnya.
+              Coba cari nama MUA atau lokasi lainnya.
             </Text>
 
             <TouchableOpacity
               style={styles.resetButton}
-              onPress={clearSearch}
+              onPress={() => setSearch('')}
             >
               <Text style={styles.resetButtonText}>
                 Reset Search
@@ -278,8 +196,7 @@ export default function ExploreScreen() {
           </View>
         )}
 
-        {/* BOTTOM SPACE */}
-        <View style={{ height: 30 }} />
+        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
@@ -293,41 +210,54 @@ const styles = StyleSheet.create({
 
   content: {
     padding: 20,
-    paddingTop: 55,
+    paddingTop: 50,
     paddingBottom: 40,
   },
 
   header: {
+    height: 50,
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
+  },
+
+  backButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
     alignItems: 'center',
   },
 
+  backIcon: {
+    fontSize: 34,
+    color: '#333',
+    marginTop: -4,
+  },
+
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#222',
+  },
+
+  headerSpace: {
+    width: 42,
+  },
+
   title: {
-    fontSize: 28,
+    marginTop: 25,
+    fontSize: 25,
     fontWeight: '800',
     color: '#292124',
   },
 
   subtitle: {
-    marginTop: 6,
-    fontSize: 14,
+    marginTop: 7,
+    fontSize: 13,
+    lineHeight: 20,
     color: '#777',
-    lineHeight: 21,
-    maxWidth: 290,
-  },
-
-  headerIcon: {
-    width: 45,
-    height: 45,
-    borderRadius: 23,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  headerIconText: {
-    fontSize: 21,
   },
 
   searchContainer: {
@@ -351,103 +281,9 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 
-  clearButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#F5E7EC',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
   clearText: {
-    fontSize: 20,
+    fontSize: 24,
     color: '#B75B74',
-    lineHeight: 22,
-  },
-
-  infoCard: {
-    marginTop: 18,
-    padding: 15,
-    borderRadius: 18,
-    backgroundColor: '#FFE5EF',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  infoIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  infoTextContainer: {
-    flex: 1,
-    marginLeft: 12,
-  },
-
-  infoTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#5A303D',
-  },
-
-  infoText: {
-    marginTop: 4,
-    fontSize: 11,
-    lineHeight: 16,
-    color: '#8A6872',
-  },
-
-  sectionHeader: {
-    marginTop: 28,
-    marginBottom: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-
-  sectionTitle: {
-    fontSize: 19,
-    fontWeight: '700',
-    color: '#292124',
-  },
-
-  categoryHint: {
-    fontSize: 11,
-    color: '#999',
-  },
-
-  categoryList: {
-    gap: 10,
-    paddingRight: 20,
-  },
-
-  categoryButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#F0DDE3',
-  },
-
-  categoryButtonSelected: {
-    backgroundColor: '#E91E63',
-    borderColor: '#E91E63',
-  },
-
-  categoryText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#777',
-  },
-
-  categoryTextSelected: {
-    color: '#FFFFFF',
   },
 
   resultHeader: {
@@ -458,10 +294,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  activeFilter: {
-    marginTop: 4,
-    fontSize: 11,
-    color: '#B75B74',
+  sectionTitle: {
+    fontSize: 19,
+    fontWeight: '700',
+    color: '#292124',
   },
 
   resultCount: {
@@ -573,7 +409,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 35,
     alignItems: 'center',
-    marginTop: 10,
   },
 
   emptyIcon: {
@@ -592,7 +427,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#999',
     textAlign: 'center',
-    lineHeight: 20,
   },
 
   resetButton: {

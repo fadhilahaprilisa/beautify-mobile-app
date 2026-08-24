@@ -1,7 +1,8 @@
 import { MUA_DATA } from '@/data/muaData';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,6 +13,11 @@ import {
 
 export default function HomeScreen() {
   const router = useRouter();
+
+  // =========================
+  // SEARCH & FILTER
+  // =========================
+
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
 
@@ -35,6 +41,44 @@ export default function HomeScreen() {
     }
   };
 
+  // =========================
+  // BANNER
+  // =========================
+
+  const [bannerIndex, setBannerIndex] = useState(0);
+
+  const bannerImages = [
+    {
+      name: 'Alya Makeup Artist',
+      image:
+        'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=800',
+    },
+    {
+      name: 'Nadia Beauty',
+      image:
+        'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800',
+    },
+    {
+      name: 'Beauty Inspiration',
+      image:
+        'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800',
+    },
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBannerIndex((current) =>
+        current === bannerImages.length - 1 ? 0 : current + 1
+      );
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // =========================
+  // HOME
+  // =========================
+
   return (
     <ScrollView
       style={styles.container}
@@ -51,7 +95,13 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.notificationButton}>
+        <TouchableOpacity
+          style={styles.notificationButton}
+          activeOpacity={0.7}
+          onPress={() => {
+            alert('No new notifications ✨');
+          }}
+        >
           <Text style={styles.notificationIcon}>🔔</Text>
         </TouchableOpacity>
       </View>
@@ -71,7 +121,21 @@ export default function HomeScreen() {
 
       {/* BANNER */}
       <View style={styles.banner}>
-        <View style={styles.bannerText}>
+        {/* Banner Image */}
+        <View style={styles.bannerImageContainer}>
+          <Image
+            source={{
+              uri: bannerImages[bannerIndex].image,
+            }}
+            style={styles.bannerImage}
+          />
+        </View>
+
+        {/* Dark Overlay */}
+        <View style={styles.bannerOverlay} />
+
+        {/* Banner Content */}
+        <View style={styles.bannerContent}>
           <Text style={styles.bannerSmall}>
             BEAUTY FOR YOUR SPECIAL DAY
           </Text>
@@ -80,11 +144,33 @@ export default function HomeScreen() {
             Look Beautiful.{'\n'}Feel Confident.
           </Text>
 
-          <TouchableOpacity style={styles.bannerButton}>
+          <Text style={styles.bannerArtist}>
+            {bannerImages[bannerIndex].name}
+          </Text>
+
+          <TouchableOpacity
+            style={styles.bannerButton}
+            activeOpacity={0.8}
+            onPress={() => router.push('/explore' as any)}
+          >
             <Text style={styles.bannerButtonText}>
               Explore Now
             </Text>
           </TouchableOpacity>
+        </View>
+
+        {/* Banner Indicator */}
+        <View style={styles.bannerDots}>
+          {bannerImages.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.bannerDot,
+                index === bannerIndex &&
+                  styles.bannerDotActive,
+              ]}
+            />
+          ))}
         </View>
       </View>
 
@@ -93,7 +179,8 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Categories</Text>
 
         <TouchableOpacity
-          onPress={() => setSelectedCategory('')}
+          activeOpacity={0.7}
+          onPress={() => router.push('/explore' as any)}
         >
           <Text style={styles.seeAll}>See All</Text>
         </TouchableOpacity>
@@ -127,13 +214,13 @@ export default function HomeScreen() {
 
         <CategoryItem
           icon="👰"
-          title="Bridal"
-          selected={selectedCategory === 'Bridal'}
-          onPress={() => handleCategoryPress('Bridal')}
+          title="Wedding"
+          selected={selectedCategory === 'Wedding'}
+          onPress={() => handleCategoryPress('Wedding')}
         />
       </ScrollView>
 
-      {/* FILTER RESULT */}
+      {/* SEARCH / FILTER RESULT */}
       {(search.length > 0 || selectedCategory !== '') && (
         <View style={styles.searchResults}>
           <Text style={styles.searchResultTitle}>
@@ -189,11 +276,15 @@ export default function HomeScreen() {
       {search.length === 0 && selectedCategory === '' && (
         <>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Popular MUA</Text>
+            <Text style={styles.sectionTitle}>
+              Popular MUA
+            </Text>
 
-            <TouchableOpacity>
-              <Text style={styles.seeAll}>See All</Text>
-            </TouchableOpacity>
+            <TouchableOpacity
+  onPress={() => router.push('/(tabs)/explore')}
+>
+  <Text style={styles.seeAll}>See All</Text>
+</TouchableOpacity>
           </View>
 
           {/* ALYA */}
@@ -218,7 +309,9 @@ export default function HomeScreen() {
               </Text>
 
               <View style={styles.ratingRow}>
-                <Text style={styles.rating}>⭐ 4.9</Text>
+                <Text style={styles.rating}>
+                  ⭐ 4.9
+                </Text>
 
                 <Text style={styles.review}>
                   (128 reviews)
@@ -257,7 +350,9 @@ export default function HomeScreen() {
               </Text>
 
               <View style={styles.ratingRow}>
-                <Text style={styles.rating}>⭐ 4.8</Text>
+                <Text style={styles.rating}>
+                  ⭐ 4.8
+                </Text>
 
                 <Text style={styles.review}>
                   (96 reviews)
@@ -275,9 +370,15 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </>
       )}
+
+      <View style={{ height: 30 }} />
     </ScrollView>
   );
 }
+
+// ======================================================
+// CATEGORY ITEM
+// ======================================================
 
 function CategoryItem({
   icon,
@@ -302,7 +403,9 @@ function CategoryItem({
           selected && styles.categoryIconSelected,
         ]}
       >
-        <Text style={styles.categoryEmoji}>{icon}</Text>
+        <Text style={styles.categoryEmoji}>
+          {icon}
+        </Text>
       </View>
 
       <Text
@@ -317,6 +420,10 @@ function CategoryItem({
   );
 }
 
+// ======================================================
+// STYLES
+// ======================================================
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -329,6 +436,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
 
+  // HEADER
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -360,6 +468,7 @@ const styles = StyleSheet.create({
     fontSize: 21,
   },
 
+  // SEARCH
   searchContainer: {
     height: 52,
     backgroundColor: '#FFFFFF',
@@ -381,6 +490,164 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 
+  // BANNER
+  banner: {
+    height: 240,
+    borderRadius: 22,
+    marginTop: 24,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+
+  bannerImageContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+
+  bannerImage: {
+    width: '100%',
+    height: '100%',
+  },
+
+  bannerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(40, 20, 30, 0.45)',
+  },
+
+  bannerContent: {
+    position: 'absolute',
+    left: 22,
+    top: 22,
+    right: 22,
+  },
+
+  bannerSmall: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+    color: '#FFFFFF',
+  },
+
+  bannerTitle: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginTop: 8,
+  },
+
+  bannerArtist: {
+    marginTop: 6,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFE5EF',
+  },
+
+  bannerButton: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginTop: 14,
+  },
+
+  bannerButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#B75B74',
+  },
+
+  bannerDots: {
+    position: 'absolute',
+    bottom: 14,
+    left: 22,
+    flexDirection: 'row',
+    gap: 6,
+  },
+
+  bannerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+  },
+
+  bannerDotActive: {
+    width: 18,
+    backgroundColor: '#FFFFFF',
+  },
+
+  // SECTION
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 28,
+    marginBottom: 15,
+  },
+
+  sectionTitle: {
+    fontSize: 19,
+    fontWeight: '700',
+    color: '#292124',
+  },
+
+  seeAll: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#B75B74',
+  },
+
+  // CATEGORY
+  categoryList: {
+    gap: 14,
+  },
+
+  categoryItem: {
+    alignItems: 'center',
+    width: 75,
+  },
+
+  categoryIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FCE4EC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  categoryIconSelected: {
+    backgroundColor: '#F2B8C6',
+    borderWidth: 2,
+    borderColor: '#B75B74',
+  },
+
+  categoryEmoji: {
+    fontSize: 25,
+  },
+
+  categoryTitle: {
+    marginTop: 8,
+    fontSize: 12,
+    color: '#555',
+    fontWeight: '500',
+  },
+
+  categoryTitleSelected: {
+    color: '#B75B74',
+    fontWeight: '700',
+  },
+
+  // SEARCH RESULTS
   searchResults: {
     marginTop: 20,
   },
@@ -452,109 +719,7 @@ const styles = StyleSheet.create({
     color: '#B75B74',
   },
 
-  banner: {
-    backgroundColor: '#F2B8C6',
-    borderRadius: 22,
-    marginTop: 24,
-    padding: 22,
-    minHeight: 180,
-    justifyContent: 'center',
-  },
-
-  bannerText: {
-    width: '75%',
-  },
-
-  bannerSmall: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 1,
-    color: '#7D4A59',
-  },
-
-  bannerTitle: {
-    fontSize: 24,
-    lineHeight: 30,
-    fontWeight: '800',
-    color: '#3D222A',
-    marginTop: 8,
-  },
-
-  bannerButton: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    marginTop: 15,
-  },
-
-  bannerButtonText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#9B5367',
-  },
-
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 28,
-    marginBottom: 15,
-  },
-
-  sectionTitle: {
-    fontSize: 19,
-    fontWeight: '700',
-    color: '#292124',
-  },
-
-  seeAll: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#B75B74',
-  },
-
-  categoryList: {
-    gap: 14,
-  },
-
-  categoryItem: {
-    alignItems: 'center',
-    width: 75,
-  },
-
-  categoryIcon: {
-  width: 60,
-  height: 60,
-  borderRadius: 30,
-  backgroundColor: '#FCE4EC',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-
-categoryIconSelected: {
-  backgroundColor: '#F2B8C6',
-  borderWidth: 2,
-  borderColor: '#B75B74',
-},
-
-  categoryEmoji: {
-    fontSize: 25,
-  },
-
-  categoryTitle: {
-    marginTop: 8,
-    fontSize: 12,
-    color: '#555',
-    fontWeight: '500',
-  },
-
-  categoryTitleSelected: {
-  color: '#B75B74',
-  fontWeight: '700',
-},
-
+  // MUA CARD
   muaCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 18,
