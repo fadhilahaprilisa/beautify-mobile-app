@@ -1,50 +1,158 @@
-# Welcome to your Expo app 👋
+# Beautify 💄
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Beautify** is a mobile beauty service booking application built with React Native and Expo. The application is designed to help users discover makeup artists, explore beauty services, view MUA details, save favorites, and make beauty service bookings through a simple and user-friendly interface.
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+* 🏠 **Home** — Discover beauty services and popular makeup artists.
+* 🔎 **Search & Filter** — Search makeup artists and filter them by beauty service category.
+* 💄 **MUA Details** — View makeup artist information, location, rating, reviews, services, and pricing.
+* ❤️ **Favorite MUA** — Add and remove favorite makeup artists.
+* 📅 **Booking** — Book a beauty service with selected makeup artists.
+* ✅ **Booking Success** — Display booking confirmation after completing a booking.
+* 📍 **Track MUA** — View the makeup artist tracking page after booking.
+* 🔔 **Notifications** — Access the notification page from the Home screen.
+* 👤 **Profile** — Access account-related features.
+* 🔐 **Login & Register** — User authentication interface.
+* ⚙️ **Settings** — Access application settings.
+* ❓ **Help & Support** — Access help and support information.
+* 🧭 **Bottom Navigation** — Easy navigation between Home, Explore, Favorite, and Profile.
 
-   ```bash
-   npm install
-   ```
+## 🎨 Beauty Categories
 
-2. Start the app
+Beautify provides several beauty service categories:
 
-   ```bash
-   npx expo start
-   ```
+* Makeup
+* Hair
+* Nails
+* Wedding
+* Party
+* Engagement
+* Graduation
+* Luxury Destination Wedding Package
+* Red Carpet & Gala Look VIP
+* Commercial & Fashion
+* Special Effects (SFX)
+* Stage & TV
+* Edukasi & Masterclass
+* Performance Art Beauty
 
-In the output, you'll find options to open the app in a
+## 🛠️ Tech Stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+* **React Native**
+* **Expo**
+* **Expo Router**
+* **TypeScript**
+* **JavaScript**
+* **React Native Components**
+* **Git & GitHub**
+* **Figma** for UI/UX design and prototyping
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 📱 Application Flow
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```text
+Home
+  ↓
+Explore
+  ↓
+Search / Filter
+  ↓
+MUA Detail
+  ↓
+Booking
+  ↓
+Booking Success
+  ↓
+Track MUA
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Users can also access:
 
-## Learn more
+```text
+Home
+ ├── Favorite
+ ├── Notifications
+ └── Profile
+      ├── Login
+      ├── Register
+      ├── My Booking
+      ├── Favorite MUA
+      ├── Settings
+      └── Help & Support
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## 📂 Project Structure
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```text
+Beautify/
+├── app/
+│   ├── (tabs)/
+│   │   ├── index.tsx
+│   │   ├── explore.tsx
+│   │   ├── favorite.tsx
+│   │   └── profile.tsx
+│   ├── auth/
+│   ├── booking/
+│   ├── mua/
+│   ├── favorite.tsx
+│   ├── my-booking.tsx
+│   ├── notifications.tsx
+│   ├── settings.tsx
+│   └── help.tsx
+├── assets/
+├── components/
+├── utils/
+├── package.json
+└── README.md
+```
 
-## Join the community
+## 🚀 Getting Started
 
-Join our community of developers creating universal apps.
+### 1. Clone the repository
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+git clone https://github.com/fadhilahaprilisa/beautify-mobile-app.git
+```
+
+### 2. Open the project
+
+```bash
+cd beautify-mobile-app
+```
+
+### 3. Install dependencies
+
+```bash
+npm install
+```
+
+### 4. Start the Expo development server
+
+```bash
+npx expo start
+```
+
+### 5. Run on Expo Go
+
+Scan the QR code displayed by Expo with the **Expo Go** application on your mobile device.
+
+## 🎯 Project Status
+
+Beautify is currently a **frontend mobile application prototype** developed with React Native and Expo.
+
+The application focuses on implementing the user interface, navigation, interaction flow, dummy MUA data, search and filtering, favorite functionality, booking flow, and supporting application screens based on the Beautify UI/UX design.
+
+## 🎨 Design
+
+The application UI/UX was designed and prototyped in **Figma** before being implemented in React Native and Expo.
+
+## 👩‍💻 Developer
+
+**Fadhilah Aprilisa**
+
+Informatics Engineering Student
+Universitas Pamulang
+
+---
+
+⭐ This project was created as a mobile application development project and portfolio project.
