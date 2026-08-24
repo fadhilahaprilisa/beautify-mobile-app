@@ -57,31 +57,45 @@ export default function ProfileScreen() {
       </View>
 
       {/* MENU */}
-      <View style={styles.menuCard}>
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>📋</Text>
-          <Text style={styles.menuText}>My Booking</Text>
-          <Text style={styles.arrow}>›</Text>
-        </TouchableOpacity>
+<View style={styles.menuCard}>
 
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>❤️</Text>
-          <Text style={styles.menuText}>Favorite MUA</Text>
-          <Text style={styles.arrow}>›</Text>
-        </TouchableOpacity>
+  <TouchableOpacity
+    style={styles.menuItem}
+    onPress={() => router.push('/my-booking')}
+  >
+    <Text style={styles.menuIcon}>📋</Text>
+    <Text style={styles.menuText}>My Booking</Text>
+    <Text style={styles.arrow}>›</Text>
+  </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>⚙️</Text>
-          <Text style={styles.menuText}>Settings</Text>
-          <Text style={styles.arrow}>›</Text>
-        </TouchableOpacity>
+  <TouchableOpacity
+    style={styles.menuItem}
+    onPress={() => router.push('/favorite')}
+  >
+    <Text style={styles.menuIcon}>❤️</Text>
+    <Text style={styles.menuText}>Favorite MUA</Text>
+    <Text style={styles.arrow}>›</Text>
+  </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>❓</Text>
-          <Text style={styles.menuText}>Help & Support</Text>
-          <Text style={styles.arrow}>›</Text>
-        </TouchableOpacity>
-      </View>
+  <TouchableOpacity
+    style={styles.menuItem}
+    onPress={() => router.push('/settings')}
+  >
+    <Text style={styles.menuIcon}>⚙️</Text>
+    <Text style={styles.menuText}>Settings</Text>
+    <Text style={styles.arrow}>›</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.menuItem}
+    onPress={() => router.push('/help')}
+  >
+    <Text style={styles.menuIcon}>❓</Text>
+    <Text style={styles.menuText}>Help & Support</Text>
+    <Text style={styles.arrow}>›</Text>
+  </TouchableOpacity>
+
+</View>
     </View>
   );
 }
