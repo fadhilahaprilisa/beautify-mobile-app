@@ -1,86 +1,259 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function BookingScreen() {
   const router = useRouter();
 
-  const { mua, price } = useLocalSearchParams();
+  const { muaId, muaName } = useLocalSearchParams();
+
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [note, setNote] = useState('');
+
+  const generateDates = () => {
+    const dates = [];
+
+    for (let i = 1; i <= 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() + i);
+
+      dates.push({
+        day: date.toLocaleDateString('en-US', {
+          weekday: 'short',
+        }),
+        date: date.getDate(),
+        month: date.toLocaleDateString('en-US', {
+          month: 'short',
+        }),
+        value: date.toISOString().split('T')[0],
+      });
+    }
+
+    return dates;
+  };
+
+  const dates = generateDates();
+
+  const times = [
+    '09:00',
+    '10:00',
+    '11:00',
+    '13:00',
+    '14:00',
+    '15:00',
+    '16:00',
+    '17:00',
+  ];
+
+  const isFormComplete =
+    selectedDate &&
+    selectedTime &&
+    customerName.trim() &&
+    phone.trim();
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity
-          style={styles.backButton}
           onPress={() => router.back()}
+          style={styles.backButton}
         >
-          <Text style={styles.backIcon}>‹</Text>
+          <Text style={styles.backButtonText}>‹</Text>
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Booking</Text>
 
-        <View style={{ width: 42 }} />
+        <View style={styles.headerSpacer} />
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title}>Book Your Makeup</Text>
-
-        <Text style={styles.subtitle}>
-          Lengkapi detail booking kamu
+        {/* MUA */}
+        <Text style={styles.sectionTitle}>
+          Makeup Artist
         </Text>
 
         <View style={styles.muaCard}>
-          <Text style={styles.label}>Makeup Artist</Text>
-
           <Text style={styles.muaName}>
-            {mua || 'Alya Makeup Artist'}
+            {muaName}
           </Text>
 
-          <Text style={styles.price}>
-            {price || 'Rp350.000'}
+          <Text style={styles.muaId}>
+            MUA ID: {muaId}
           </Text>
         </View>
 
-        <Text style={styles.inputLabel}>Your Name</Text>
+        {/* DATE */}
+        <Text style={styles.sectionTitle}>
+          Select Date
+        </Text>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.dateScroll}
+        >
+          {dates.map((item) => (
+            <TouchableOpacity
+              key={item.value}
+              style={[
+                styles.dateCard,
+                selectedDate === item.value &&
+                  styles.dateCardSelected,
+              ]}
+              onPress={() =>
+                setSelectedDate(item.value)
+              }
+            >
+              <Text
+                style={[
+                  styles.dayText,
+                  selectedDate === item.value &&
+                    styles.selectedText,
+                ]}
+              >
+                {item.day}
+              </Text>
+
+              <Text
+                style={[
+                  styles.dateText,
+                  selectedDate === item.value &&
+                    styles.selectedText,
+                ]}
+              >
+                {item.date}
+              </Text>
+
+              <Text
+                style={[
+                  styles.monthText,
+                  selectedDate === item.value &&
+                    styles.selectedText,
+                ]}
+              >
+                {item.month}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* TIME */}
+        <Text style={styles.sectionTitle}>
+          Select Time
+        </Text>
+
+        <View style={styles.timeGrid}>
+          {times.map((time) => (
+            <TouchableOpacity
+              key={time}
+              style={[
+                styles.timeCard,
+                selectedTime === time &&
+                  styles.timeCardSelected,
+              ]}
+              onPress={() => setSelectedTime(time)}
+            >
+              <Text
+                style={[
+                  styles.timeText,
+                  selectedTime === time &&
+                    styles.selectedText,
+                ]}
+              >
+                {time}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* CUSTOMER */}
+        <Text style={styles.sectionTitle}>
+          Customer Information
+        </Text>
+
+        <Text style={styles.inputLabel}>
+          Full Name *
+        </Text>
 
         <TextInput
           style={styles.input}
-          placeholder="Masukkan nama"
+          placeholder="Enter your name"
           placeholderTextColor="#999"
+          value={customerName}
+          onChangeText={setCustomerName}
         />
 
-        <Text style={styles.inputLabel}>Date</Text>
+        <Text style={styles.inputLabel}>
+          Phone Number *
+        </Text>
 
         <TextInput
           style={styles.input}
-          placeholder="Contoh: 20 Agustus 2026"
+          placeholder="08xxxxxxxxxx"
           placeholderTextColor="#999"
+          keyboardType="phone-pad"
+          value={phone}
+          onChangeText={setPhone}
         />
 
-        <Text style={styles.inputLabel}>Location</Text>
+        <Text style={styles.inputLabel}>
+          Notes
+        </Text>
 
         <TextInput
-          style={[styles.input, styles.locationInput]}
-          placeholder="Masukkan alamat acara"
+          style={[styles.input, styles.noteInput]}
+          placeholder="Add notes for the MUA (optional)"
           placeholderTextColor="#999"
           multiline
+          value={note}
+          onChangeText={setNote}
         />
 
+        {/* CONTINUE */}
         <TouchableOpacity
-          style={styles.confirmButton}
-          onPress={() => router.push('/booking/success')}
+          style={[
+            styles.continueButton,
+            !isFormComplete &&
+              styles.continueButtonDisabled,
+          ]}
+          disabled={!isFormComplete}
+          onPress={() =>
+            router.push({
+              pathname: '/booking/summary',
+              params: {
+                muaId: muaId as string,
+                muaName: muaName as string,
+                date: selectedDate,
+                time: selectedTime,
+                customerName,
+                phone,
+                note,
+              },
+            } as any)
+          }
         >
-          <Text style={styles.confirmText}>
-            Confirm Booking
+          <Text style={styles.continueButtonText}>
+            Continue
           </Text>
         </TouchableOpacity>
+
+        <View style={{ height: 40 }} />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -92,10 +265,11 @@ const styles = StyleSheet.create({
 
   header: {
     height: 65,
-    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    backgroundColor: '#FFF8FB',
   },
 
   backButton: {
@@ -107,94 +281,161 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  backIcon: {
-    fontSize: 34,
+  backButtonText: {
+    fontSize: 32,
     color: '#333',
     marginTop: -4,
   },
 
   headerTitle: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '700',
     color: '#222',
+  },
+
+  headerSpacer: {
+    width: 42,
   },
 
   content: {
     padding: 20,
   },
 
-  title: {
-    fontSize: 26,
+  sectionTitle: {
+    fontSize: 20,
     fontWeight: '700',
     color: '#222',
-  },
-
-  subtitle: {
-    marginTop: 6,
-    fontSize: 14,
-    color: '#777',
+    marginBottom: 14,
+    marginTop: 8,
   },
 
   muaCard: {
-    marginTop: 24,
-    padding: 18,
-    borderRadius: 18,
     backgroundColor: '#FFE5EF',
-  },
-
-  label: {
-    fontSize: 12,
-    color: '#888',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 15,
   },
 
   muaName: {
-    marginTop: 6,
-    fontSize: 19,
-    fontWeight: '700',
-    color: '#222',
-  },
-
-  price: {
-    marginTop: 6,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
     color: '#E91E63',
   },
 
-  inputLabel: {
-    marginTop: 20,
-    marginBottom: 8,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+  muaId: {
+    marginTop: 5,
+    fontSize: 12,
+    color: '#888',
   },
 
-  input: {
-    height: 50,
-    paddingHorizontal: 15,
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+  dateScroll: {
+    marginBottom: 10,
+  },
+
+  dateCard: {
+    width: 72,
+    height: 95,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: '#EEEEEE',
-    color: '#333',
-  },
-
-  locationInput: {
-    height: 90,
-    paddingTop: 15,
-    textAlignVertical: 'top',
-  },
-
-  confirmButton: {
-    marginTop: 30,
-    height: 54,
-    borderRadius: 15,
-    backgroundColor: '#E91E63',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+
+  dateCardSelected: {
+    backgroundColor: '#E91E63',
+    borderColor: '#E91E63',
+  },
+
+  dayText: {
+    fontSize: 12,
+    color: '#777',
+  },
+
+  dateText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#222',
+    marginVertical: 3,
+  },
+
+  monthText: {
+    fontSize: 11,
+    color: '#777',
+  },
+
+  selectedText: {
+    color: '#FFFFFF',
+  },
+
+  timeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 10,
+  },
+
+  timeCard: {
+    width: '22%',
+    minWidth: 70,
+    paddingVertical: 13,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
   },
 
-  confirmText: {
+  timeCardSelected: {
+    backgroundColor: '#E91E63',
+    borderColor: '#E91E63',
+  },
+
+  timeText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#555',
+  },
+
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#555',
+    marginBottom: 7,
+    marginTop: 8,
+  },
+
+  input: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    fontSize: 14,
+    color: '#333',
+  },
+
+  noteInput: {
+    height: 90,
+    textAlignVertical: 'top',
+  },
+
+  continueButton: {
+    backgroundColor: '#E91E63',
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 25,
+  },
+
+  continueButtonDisabled: {
+    backgroundColor: '#D9D9D9',
+  },
+
+  continueButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',

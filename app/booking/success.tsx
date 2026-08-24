@@ -1,34 +1,117 @@
-import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect } from 'react';
 import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function BookingSuccessScreen() {
   const router = useRouter();
 
+  const {
+    muaName,
+    date,
+    time,
+    customerName,
+  } = useLocalSearchParams();
+
+  useEffect(() => {
+    saveBooking();
+  }, []);
+
+  const saveBooking = async () => {
+    try {
+      const existingBookings =
+        await AsyncStorage.getItem('bookings');
+
+      const bookings = existingBookings
+        ? JSON.parse(existingBookings)
+        : [];
+
+      const newBooking = {
+        id: Date.now().toString(),
+        muaName,
+        date,
+        time,
+        customerName,
+        status: 'Confirmed',
+      };
+
+      bookings.push(newBooking);
+
+      await AsyncStorage.setItem(
+        'bookings',
+        JSON.stringify(bookings)
+      );
+    } catch (error) {
+      console.log('Failed to save booking:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.iconCircle}>
-        <Text style={styles.icon}>✓</Text>
+        <Text style={styles.checkIcon}>✓</Text>
       </View>
 
       <Text style={styles.title}>
         Booking Successful!
       </Text>
 
-      <Text style={styles.description}>
-        Booking kamu berhasil dibuat. Makeup artist akan
-        menghubungi kamu untuk konfirmasi.
+      <Text style={styles.subtitle}>
+        Your beauty appointment has been confirmed.
       </Text>
 
+      <View style={styles.card}>
+        <Text style={styles.label}>
+          Makeup Artist
+        </Text>
+
+        <Text style={styles.value}>
+          {muaName}
+        </Text>
+
+        <View style={styles.divider} />
+
+        <Text style={styles.label}>
+          Date
+        </Text>
+
+        <Text style={styles.value}>
+          {date}
+        </Text>
+
+        <View style={styles.divider} />
+
+        <Text style={styles.label}>
+          Time
+        </Text>
+
+        <Text style={styles.value}>
+          {time}
+        </Text>
+
+        <View style={styles.divider} />
+
+        <Text style={styles.label}>
+          Customer
+        </Text>
+
+        <Text style={styles.value}>
+          {customerName}
+        </Text>
+      </View>
+
       <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.replace('/(tabs)')}
+        style={styles.homeButton}
+        onPress={() =>
+          router.replace('/(tabs)' as any)
+        }
       >
-        <Text style={styles.buttonText}>
+        <Text style={styles.homeButtonText}>
           Back to Home
         </Text>
       </TouchableOpacity>
@@ -40,53 +123,77 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF8FB',
-    justifyContent: 'center',
     alignItems: 'center',
-    padding: 30,
+    padding: 20,
+    paddingTop: 80,
   },
 
   iconCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: '#FFE5EF',
-    justifyContent: 'center',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#E91E63',
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
   },
 
-  icon: {
-    fontSize: 48,
+  checkIcon: {
+    color: '#FFFFFF',
+    fontSize: 42,
     fontWeight: '700',
-    color: '#E91E63',
   },
 
   title: {
-    marginTop: 25,
-    fontSize: 27,
+    fontSize: 25,
     fontWeight: '700',
     color: '#222',
     textAlign: 'center',
   },
 
-  description: {
-    marginTop: 12,
+  subtitle: {
     fontSize: 14,
-    lineHeight: 22,
     color: '#777',
     textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 25,
   },
 
-  button: {
-    marginTop: 35,
+  card: {
     width: '100%',
-    height: 54,
-    borderRadius: 15,
-    backgroundColor: '#E91E63',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 18,
   },
 
-  buttonText: {
+  label: {
+    fontSize: 12,
+    color: '#999',
+    marginBottom: 5,
+  },
+
+  value: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: '#F0F0F0',
+    marginVertical: 14,
+  },
+
+  homeButton: {
+    width: '100%',
+    backgroundColor: '#E91E63',
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 25,
+  },
+
+  homeButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
