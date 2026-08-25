@@ -1,6 +1,7 @@
 # Beautify 💄
 
 **Beautify** is a mobile beauty service booking application built with React Native and Expo. The application is designed to help users discover makeup artists, explore beauty services, view MUA details, save favorites, and make beauty service bookings through a simple and user-friendly interface.
+<img width="743" height="1600" alt="tampilan ui" src="https://github.com/user-attachments/assets/bd9e1db7-9d43-4c96-a46a-2fd45a8741d1" />
 
 ## ✨ Features
 
